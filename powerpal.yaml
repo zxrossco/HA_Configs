@@ -1,0 +1,66 @@
+esphome:
+  name: powerpal
+  
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+#external_components:
+#  - source: github://muneeb1990/esphome@powerpal_ble
+#    # requires ble_client because I had to add some small features to authenticate properly
+#    components: [ powerpal_ble ]
+external_components:
+  - source:
+      type: git
+      url: https://github.com/muneeb1990/esphome
+      ref: powerpal_ble
+    components: [ powerpal_ble ]   
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "bmgvH5ZIas/t8hZgQ5ZWOR7/ypWGEOHDc73Gs4SnOt4="
+
+ota:
+  password: !secret esphome_secret
+  platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: "powerpalable Fallback Hotspot"
+    password: "super_secret"
+
+
+# optional requirement used with daily energy sensor
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: !secret powerpal_mac_address
+    id: powerpal
+
+sensor:
+  - platform: powerpal_ble
+    ble_client_id: powerpal
+    power:
+      name: "Powerpal Power"
+    daily_energy:
+      name: "Powerpal Daily Energy"
+    energy:
+      name: "Powerpal Total Energy"
+    battery_level:
+      name: "Powerpal Battery"
+    pairing_code: !secret powerpal_pairing_code
+    notification_interval: 1
+    pulses_per_kwh: 3200
+    time_id: homeassistant_time # daily energy still works without a time_id, but recommended to include one to properly handle daylight savings, etc.
