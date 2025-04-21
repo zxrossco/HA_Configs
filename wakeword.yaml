@@ -9,10 +9,26 @@ esphome:
     board_build.flash_mode: qio 
 
 
+
+#esp32:
+#  board: esp32-s3-devkitc-1 # esp32s3box # Use the specific board type if available, or a generic s3 like esp32-s3-devkitc-1
+#  framework:
+#    type: esp-idf # Required for the S3 and I2S audio input
 esp32:
-  board: esp32-s3-devkitc-1 # esp32s3box # Use the specific board type if available, or a generic s3 like esp32-s3-devkitc-1
+  board: esp32s3box
+  variant: esp32s3
   framework:
-    type: esp-idf # Required for the S3 and I2S audio input
+    type: esp-idf
+    version: 4.4.8            # Version Required as later Mic no working https://community.home-assistant.io/t/solved-micro-wake-word-not-working-on-esp32-s3-e-g-seed-studio-xiao-sense-esp32-s3-sense/873638
+    platform_version: 5.4.0   # https://github.com/esphome/issues/issues/6582
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: y
+      CONFIG_COMPILER_OPTIMIZATION: "Performance"
+
+psram:
+  mode: octal
+  speed: 80MHz
+
 
 # Enable logging
 logger:
@@ -45,79 +61,111 @@ captive_portal:
 # web_server:
 #   port: 80
 # Configuration for the status LED light
-light:
-  - platform: status_led
-    id: light0
-    name: "Voice Assistant State"
-    pin:
-      number: GPIO21
-      inverted: true
+#light:
+#  - platform: status_led
+#    id: light0
+#    name: "Voice Assistant State"
+#    pin:
+#      number: GPIO21
+#      inverted: true
 
       
 # MSM261D3526H1CPM MEMs Microphone https://files.seeedstudio.com/wiki/XIAO-BLE/mic-MSM261D3526H1CPM-ENG.pdf
 # Pins 41 PDM Data, 42 Clock
 # 16KHz 16 bits
 
-i2s_audio:
-  i2s_lrclk_pin: 42
+#i2s_audio:
+#  i2s_lrclk_pin: 42
   #i2s_lrclk_pin: GPIO46 # Note: labeled as "useless"
   #i2s_bclk_pin: GPIO42  
  
 # Example configuration entry
  
+#microphone:
+#  - platform: i2s_audio
+#    id: external_mic
+#    adc_type: external
+#    i2s_din_pin: GPIO41
+#    i2s_mode: secondary 
+#    pdm: true
+#    sample_rate: 16000
+#    bits_per_sample: 16bit
+#    channel: stereo 
+#    on_data:
+#    - logger.log:
+#        format: "Received %d bytes"
+#        args: ['x.size()']
+
+i2s_audio:
+  - id: i2s_microphone
+    i2s_lrclk_pin: GPIO42
+
 microphone:
   - platform: i2s_audio
-    id: external_mic
-    adc_type: external
+    i2s_audio_id: i2s_microphone
+    id: echo_microphone
     i2s_din_pin: GPIO41
-    pdm: true
-    sample_rate: 16000
+    adc_type: external
     bits_per_sample: 16bit
+    pdm: true
     channel: left
- 
- 
-# Voice Assistant component - Connects the audio stream to the Home Assistant Voice Assistant integration
+# https://community.home-assistant.io/t/solved-micro-wake-word-not-working-on-esp32-s3-e-g-seed-studio-xiao-sense-esp32-s3-sense/873638
+micro_wake_word:
+  models:
+    - model: github://esphome/micro-wake-word-models/models/v2/hey_jarvis.json@main
+  vad:
+    model: github://esphome/micro-wake-word-models/models/v2/vad.json@main
+  on_wake_word_detected:
+    then:
+      - logger.log: "🎤 Wake word triggered!"
+      - voice_assistant.start:
+          wake_word: !lambda return wake_word;
+
 voice_assistant:
-  microphone: external_mic
-  use_wake_word: True
-  noise_suppression_level: 2
+  id: voiceassistant
+  microphone: echo_microphone
+  use_wake_word: false
+  noise_suppression_level: 1
+  auto_gain: 31dBFS
+  volume_multiplier: 10
+
+  on_start:
+    - light.turn_on: onboard_led
+
+  on_end:
+    - light.turn_off: onboard_led
+    - if:
+        condition:
+          switch.is_on: use_wake_word
+        then:
+          - micro_wake_word.start:
+
+  on_error:
+    - if:
+        condition:
+          switch.is_on: use_wake_word
+        then:
+          - micro_wake_word.stop:
+          - micro_wake_word.start:
 
 switch:
   - platform: template
-    name: capture
-    optimistic: True
-    id: capture
-    turn_on_action:
-      - voice_assistant.start_continuous
-    turn_off_action:
-      - voice_assistant.stop:      
+    name: Use wake word
+    id: use_wake_word
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    on_turn_on:
+      - micro_wake_word.start:
+    on_turn_off:
+      - micro_wake_word.stop:                      
 
-# Github shorthand URL
-micro_wake_word:
-  models:
-    # Shorthand
-    #- model: okay_nabu
-    - model: hey_jarvis
-    # external file
-    #- model: github://esphome/micro-wake-word-models/models/v2/okay_nabu.json
+output:
+  - platform: ledc
+    pin: GPIO21
+    id: led_output
 
-  # This action is triggered when the wake word is detected
-  on_wake_word_detected:
-    - voice_assistant.start: # Tell Home Assistant to start a voice session using this device
+light:
+  - platform: monochromatic
+    output: led_output
+    id: onboard_led
 
-# Configuration for the binary sensor (Boot Switch)
-binary_sensor:    
-  - platform: gpio
-    pin: 
-      number: GPIO2
-      mode:
-        input: true
-        pullup: true
-    name: Boot Switch
-    internal: true
-    on_press:
-      - voice_assistant.start:
-      - light.turn_off: light0
-    on_release:
-      - voice_assistant.stop:
-      - light.turn_on: light0 
