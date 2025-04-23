@@ -50,6 +50,7 @@ wifi:
   #   static_ip: 192.168.1.150
   #   gateway: 192.168.1.1
   #   subnet: 255.255.255.0
+
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Wakeword Fallback Hotspot"
@@ -74,28 +75,6 @@ captive_portal:
 # Pins 41 PDM Data, 42 Clock
 # 16KHz 16 bits
 
-#i2s_audio:
-#  i2s_lrclk_pin: 42
-  #i2s_lrclk_pin: GPIO46 # Note: labeled as "useless"
-  #i2s_bclk_pin: GPIO42  
- 
-# Example configuration entry
- 
-#microphone:
-#  - platform: i2s_audio
-#    id: external_mic
-#    adc_type: external
-#    i2s_din_pin: GPIO41
-#    i2s_mode: secondary 
-#    pdm: true
-#    sample_rate: 16000
-#    bits_per_sample: 16bit
-#    channel: stereo 
-#    on_data:
-#    - logger.log:
-#        format: "Received %d bytes"
-#        args: ['x.size()']
-
 i2s_audio:
   - id: i2s_microphone
     i2s_lrclk_pin: GPIO42
@@ -109,6 +88,11 @@ microphone:
     bits_per_sample: 16bit
     pdm: true
     channel: left
+#    on_data:
+#    - logger.log:
+#        format: "Received %d bytes"
+#        args: ['x.size()']
+
 # https://community.home-assistant.io/t/solved-micro-wake-word-not-working-on-esp32-s3-e-g-seed-studio-xiao-sense-esp32-s3-sense/873638
 micro_wake_word:
   models:
@@ -132,6 +116,15 @@ voice_assistant:
   on_start:
     - light.turn_on: onboard_led
 
+  on_tts_end:
+    - homeassistant.service:
+        service: media_player.play_media
+        data:
+          entity_id: media_player.living_room_speaker  # Name of HA media device to output TTS
+          media_content_id: !lambda 'return x;' # https://youtu.be/o3yZWD_sFIE?si=OmPEumooWH4cCO7V&t=328
+          media_content_type: music                    # *** Note Configure Device in H.A. ESPHome to allow the callback 
+          announce: "true"
+
   on_end:
     - light.turn_off: onboard_led
     - if:
@@ -145,6 +138,7 @@ voice_assistant:
         condition:
           switch.is_on: use_wake_word
         then:
+          - logger.log: "Voice Assistant on_error MWW restarting"
           - micro_wake_word.stop:
           - micro_wake_word.start:
 
@@ -162,6 +156,7 @@ switch:
 output:
   - platform: ledc
     pin: GPIO21
+    inverted: true
     id: led_output
 
 light:
