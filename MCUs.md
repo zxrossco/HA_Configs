@@ -80,5 +80,10 @@ esp32_camera:
 
   [https://www.seeedstudio.com/Seeed-XIAO-ESP32C3-p-5431.html]
 
+
+  I get my bits via a local supplier here in Aus. Thanks to [Core Electronics](https://core-electronics.com.au/) for their great prices and service.
+
+  
+
   
   
