@@ -6,16 +6,16 @@
 
 
 Onboard LED
-`
+```
 output:
   - platform: ledc
     pin: GPIO21
     inverted: true
     id: led_output
-`
+```
 
 UART
-`
+```
 uart:
   id: ld2410_uart
   tx_pin: GPIO4
@@ -24,14 +24,14 @@ uart:
   data_bits: 8
   stop_bits: 1
   parity: NONE
-`
+```
 
 ## Seeed Studio XIAO Sense Camera
 
 [https://www.seeedstudio.com/XIAO-ESP32S3-Sense-p-5639.html]
 
 I2S Microphone
-`
+```
 i2s_audio:
   - id: i2s_microphone
     i2s_lrclk_pin: GPIO42
@@ -45,9 +45,9 @@ microphone:
     bits_per_sample: 16bit
     pdm: true
     channel: left
-`
+```
 Camera
-`
+```
 esp32_camera:
   #name: XIAO Camera
   external_clock:
@@ -73,7 +73,7 @@ esp32_camera:
   idle_framerate: 0.2 fps
   #vertical_flip: true
   #horizontal_mirror: true
-
+```
 
 
   ## Seeed XIAO ESP32C3 RISC-V
