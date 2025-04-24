@@ -24,7 +24,8 @@ The batteries in the dongle had died after some years so the casing was removed 
 
 ## Presence 
 
-[presence.yaml](https://github.com/zxrossco/HA_Configs/blob/main/presence.yaml) Contains the config for a LD2410 mmWave sensor.  Note, these work best roof mounted for the coverage area.
+[presence.yaml](https://github.com/zxrossco/HA_Configs/blob/main/presence.yaml) Contains the config for a LD2410 mmWave sensor [like this](https://hlktech.net/index.php?id=988).
+Manual for the LD2410 
 Adding a PIR too
 ![LD2410 Image](https://github.com/zxrossco/HA_Configs/blob/main/LD2410.png)
 ![PIR Image](https://github.com/zxrossco/HA_Configs/blob/main/PIR-Sensor-Pinout.png)
