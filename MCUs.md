@@ -1,8 +1,11 @@
 # MCUs used in my Home Assistant setup
 
-## Seeed Studio XIAO ESP32S3
+## Seeed Studio XIAO ESP32-S3
 
-[https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html]
+([https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html)
+
+## Waveshare ESP32-S3
+(https://www.waveshare.com/wiki/ESP32-S3-Zero)
 
 
 Onboard LED
@@ -78,8 +81,11 @@ esp32_camera:
 
   ## Seeed XIAO ESP32C3 RISC-V
 
-  [https://www.seeedstudio.com/Seeed-XIAO-ESP32C3-p-5431.html]
+  (https://www.seeedstudio.com/Seeed-XIAO-ESP32C3-p-5431.html)
 
+
+## Waveshare ESP32-C3
+(https://www.waveshare.com/wiki/ESP32-C3-Zero)
 
   I get my bits via a local supplier here in Aus. Thanks to [Core Electronics](https://core-electronics.com.au/) for their great prices and service.
 
