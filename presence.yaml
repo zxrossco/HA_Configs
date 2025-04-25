@@ -1,16 +1,15 @@
 esphome:
-  name: presences3
-  friendly_name: PresenceS3
+  name: presence
+  friendly_name: Presence
 
 esp32:
-  board: esp32-s3-devkitc-1
+  board: esp32-c3-devkitm-1
   framework:
     type: arduino
 
-
 # Enable logging
 logger:
-  baud_rate: 0
+   baud_rate: 0 #Important. You can't use serial port
 
 # Enable Home Assistant API
 api:
@@ -31,7 +30,7 @@ wifi:
     password: "aZvahtPQDC67"
 
 captive_portal:
-
+    
 # Web server (to preview the camera stream)
 web_server:
   port: 80
@@ -52,11 +51,28 @@ binary_sensor:
   - platform: ld2410
     has_target:
       name: Presence
+      device_class: occupancy
+      icon: "mdi:motion-sensor"      
     has_moving_target:
       name: Moving Target
+      icon: "mdi:walk"
     has_still_target:
       name: Still Target
+      icon: "mdi:human-male"
 
+  - platform: gpio
+    pin: GPIO3
+    name: "PIR Motion Sensor"
+    device_class: motion
+    icon: "mdi:motion-sensor"
+    filters:
+      - delayed_off: 5s  # Keeps motion 'on' state for 5s after trigger
+    on_press:
+      then:
+        - logger.log: "Motion detected!"
+    on_release:
+      then:
+        - logger.log: "Motion ended"
 switch:
   - platform: ld2410
     engineering_mode:
@@ -65,6 +81,15 @@ switch:
       name: "control bluetooth"
 
 sensor:
+  - platform: uptime
+    name: "Presence Sensor Uptime"
+    icon: "mdi:timer-outline"
+  # Signal strength in dBm
+  - platform: wifi_signal
+    name: "WiFi Signal Strength"
+    update_interval: 60s
+    unit_of_measurement: "dBm"
+    icon: "mdi:wifi"  
   - platform: ld2410
     light:
       name: light
@@ -195,7 +220,16 @@ text_sensor:
       name: "firmware version"
     mac_address:
       name: "mac address"
-
+  - platform: wifi_info
+    ip_address:
+      name: "Presence Sensor IP"
+      icon: "mdi:ip-network"
+    ssid:
+      name: "WiFi SSID"
+      icon: "mdi:wifi"
+    bssid:
+      name: "WiFi BSSID"
+      icon: "mdi:access-point"
 select:
   - platform: ld2410
     distance_resolution:
@@ -206,3 +240,4 @@ select:
       name: light function
     out_pin_level:
       name: out pin level
+
