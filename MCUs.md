@@ -7,6 +7,7 @@
 ## Waveshare ESP32-S3
 (https://www.waveshare.com/wiki/ESP32-S3-Zero)
 
+(https://github.com/atomic14/esp32-s3-pinouts)
 
 Onboard LED
 ```
