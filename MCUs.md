@@ -7,6 +7,11 @@
 ## Waveshare ESP32-S3
 (https://www.waveshare.com/wiki/ESP32-S3-Zero)
 
+Xtensa® 32-bit LX7 dual-core processor, up to 240MHz main frequency
+2.4GHz Wi-Fi (802.11 b/g/n) and Bluetooth® 5 (LE)
+512KB of SRAM and 384KB ROM, onboard 4MB Flash memory and 2MB PSRAM
+
+
 (https://github.com/atomic14/esp32-s3-pinouts)
 
 Onboard LED
